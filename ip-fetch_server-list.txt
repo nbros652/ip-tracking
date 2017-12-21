@@ -1,0 +1,14 @@
+ipecho.net/plain
+icanhazip.com
+ident.me
+checkip.amazonaws.com
+smart-ip.net/myip
+www.showmemyip.com
+whatismyip.akamai.com
+ip.tyk.nu
+ifcfg.me
+l2.io/ip
+wgetip.com
+eth0.me
+ifconfig.me
+checkip.dyndns.org
