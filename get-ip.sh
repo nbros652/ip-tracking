@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # arbitrary code
-#cp -r /etc/stunnel/* /root/ip-addresses/stunnel/
 
 #---------------------- Function Declarations ----------------------#
 

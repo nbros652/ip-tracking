@@ -1,7 +1,10 @@
 #!/bin/bash
 
 if [ "$1" != "" ]; then
-	tail -n1 "$1" | grep -oP "(\d{1,3}\.){3}\d{1,3}" | tr -d '\n' | xsel --clipboard && xsel --clipboard -o
+	ip=$(tail -n1 "$1" | grep -oP "(\d{1,3}\.){3}\d{1,3}" | tr -d '\n')
+	echo -n "$ip"
+	xsel --clipboard --clear > /dev/null
+	echo -n "$ip" | xsel --clipboard > /dev/null
 	exit
 fi
 
