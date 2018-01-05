@@ -4,6 +4,34 @@
 
 #---------------------- Function Declarations ----------------------#
 
+# DESC: return a formatted timestamp with the current time
+function getTimestamp {
+	date +%Y%m%d.%H%M%S
+}
+
+# DESC: this accepts a single string argument and outputs it to the screen with a timestamp
+function debug {
+	DEBUG=1
+	if [ $DEBUG -eq 1 ]; then
+		printf "[%s]: %s\n" "$(getTimestamp)" "$@" 1>&2
+	fi
+}
+
+# DESC: this accepts a single string argument and logs it with timestamp to the error log 
+#	file. It also passes the string along to the debug function so that if debugging is on, 
+#	we get notified on screen as well.
+function logErr {
+	# enable or disable logging
+	LOGERR=1
+	
+	# if enabled, write to the log with machine name and timestamp
+	if [ $LOGERR -eq 1 ]; then
+		host=$(hostname)
+		printf "[%s]: On $host: %s\n" "$(getTimestamp)" "$@"  >> "$errLog"
+	fi
+	debug "ERROR: $@"
+}
+
 # DESC: this function optionally runs through all of the saved servers, checking
 #	to see if they still work. I can also be used to see if a particular server is
 #	capable of returning an IP address in the expected format.
@@ -46,34 +74,6 @@ function testURLs {
 		[ "$ip" != "" ] && echo "$server works! your IP is $ip; fetch using $mode" || echo "$failure"
 	done
 	exit
-}
-
-# DESC: return a formatted timestamp with the current time
-function getTimestamp {
-	date +%Y%m%d.%H%M%S
-}
-
-# DESC: this accepts a single string argument and outputs it to the screen with a timestamp
-function debug {
-	DEBUG=1
-	if [ $DEBUG -eq 1 ]; then
-		printf "[%s]: %s\n" "$(getTimestamp)" "$@" 1>&2
-	fi
-}
-
-# DESC: this accepts a single string argument and logs it with timestamp to the error log 
-#	file. It also passes the string along to the debug function so that if debugging is on, 
-#	we get notified on screen as well.
-function logErr {
-	# enable or disable logging
-	LOGERR=1
-	
-	# if enabled, write to the log with machine name and timestamp
-	if [ $LOGERR -eq 1 ]; then
-		host=$(hostname)
-		printf "[%s]: On $host: %s\n" "$(getTimestamp)" "$@"  >> "$errLog"
-	fi
-	debug "ERROR: $@"
 }
 
 # DESC: this function attempts to fetch the external IP with dig. If dig is not installed,
@@ -144,13 +144,16 @@ function hasInternetConnection {
 }
 
 #---------------------- Environment Setup ----------------------#
-
-errLog=~/ip-addresses/error.log
-ipFile=~/ip-addresses/$(hostname).ip
+path="$(dirname $0)"
+errLog=error.log
+ipFile=$(hostname).ip
 host=$(hostname)
-serverList="$(cat ip-fetch_server-list.txt)"
+serverList="$(grep -vP "^[ ]*#" "$path/ip-fetch_server-list.txt")"
 
 #---------------------- Script Body ----------------------#
+# change to working directory
+debug "changing directory to $path"
+pushd "$path" > /dev/null 2>&1
 
 # quit if there's no Internet connection
 [ "$(hasInternetConnection)" == "" ] && logErr "no Internet connection" && exit
